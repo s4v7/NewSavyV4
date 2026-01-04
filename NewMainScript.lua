@@ -1,3 +1,6 @@
+--67 i love 9/11
+
+
 local isfile = isfile or function(file)
 	local suc, res = pcall(function()
 		return readfile(file)
