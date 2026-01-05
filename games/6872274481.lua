@@ -2538,11 +2538,10 @@ run(function()
 		end,
 		Tooltip = 'Only attacks when the sword is held'
 	})
-Killaura:CreateToggle({
-		Name = 'Swing only',
-		Tooltip = 'Only attacks while swinging manually'
-
-end)
+    LegitAura = Killaura:CreateToggle({
+        Name = 'Swing only',
+        Tooltip = 'Only attacks while swinging manually'
+    })
 	
 run(function()
 	local Value
