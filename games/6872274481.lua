@@ -1200,6 +1200,7 @@ for _, v in {'AntiRagdoll', 'TriggerBot', 'SilentAim', 'AutoRejoin', 'Rejoin', '
 end
 run(function()
 	local AimAssist
+	local Third
 	local Targets
 	local Sort
 	local AimSpeed
@@ -1208,9 +1209,10 @@ run(function()
 	local StrafeIncrease
 	local KillauraTarget
 	local ClickAim
-	
+	local Shake
+
 	AimAssist = vape.Categories.Combat:CreateModule({
-		Name = 'AimAssist',
+		Name = 'Aim Assist',
 		Function = function(callback)
 			if callback then
 				AimAssist:Clean(runService.Heartbeat:Connect(function(dt)
@@ -1223,14 +1225,33 @@ run(function()
 							NPCs = Targets.NPCs.Enabled,
 							Sort = sortmethods[Sort.Value]
 						}) or store.KillauraTarget
-	
+
 						if ent then
 							local delta = (ent.RootPart.Position - entitylib.character.RootPart.Position)
 							local localfacing = entitylib.character.RootPart.CFrame.LookVector * Vector3.new(1, 0, 1)
 							local angle = math.acos(localfacing:Dot((delta * Vector3.new(1, 0, 1)).Unit))
 							if angle >= (math.rad(AngleSlider.Value) / 2) then return end
+							
 							targetinfo.Targets[ent] = tick() + 1
-							gameCamera.CFrame = gameCamera.CFrame:Lerp(CFrame.lookAt(gameCamera.CFrame.p, ent.RootPart.Position), (AimSpeed.Value + (StrafeIncrease.Enabled and (inputService:IsKeyDown(Enum.KeyCode.A) or inputService:IsKeyDown(Enum.KeyCode.D)) and 10 or 0)) * dt)
+							local rng = Random.new()
+								
+							local targetPos = ent.RootPart.Position
+							
+							local shake = Vector3.new(
+								(rng:NextNumber() - 0.5) * Shake.Value * 0.1,
+								(rng:NextNumber() - 0.5) * Shake.Value * 0.1,
+								(rng:NextNumber() - 0.5) * Shake.Value * 0.1
+							)
+							targetPos += shake
+
+							local speed = (AimSpeed.Value + (StrafeIncrease.Enabled and (inputService:IsKeyDown(Enum.KeyCode.A) or inputService:IsKeyDown(Enum.KeyCode.D)) and 10 or 0))
+							if Third.Enabled then
+								entitylib.character.RootPart.CFrame = entitylib.character.RootPart.CFrame:Lerp(
+									CFrame.lookAt(entitylib.character.RootPart.CFrame.p, 
+									Vector3.new(ent.RootPart.Position.X, entitylib.character.RootPart.Position.Y, ent.RootPart.Position.Z)), speed * dt) -- w format
+							else
+								gameCamera.CFrame = gameCamera.CFrame:Lerp(CFrame.lookAt(gameCamera.CFrame.p, targetPos), speed * dt)
+							end
 						end
 					end
 				end))
@@ -1238,26 +1259,31 @@ run(function()
 		end,
 		Tooltip = 'Smoothly aims to closest valid target with sword'
 	})
+
 	Targets = AimAssist:CreateTargets({
 		Players = true,
 		Walls = true
 	})
+
 	local methods = {'Damage', 'Distance'}
 	for i in sortmethods do
 		if not table.find(methods, i) then
 			table.insert(methods, i)
 		end
 	end
+
 	Sort = AimAssist:CreateDropdown({
 		Name = 'Target Mode',
 		List = methods
 	})
+
 	AimSpeed = AimAssist:CreateSlider({
 		Name = 'Aim Speed',
 		Min = 1,
 		Max = 20,
 		Default = 6
 	})
+
 	Distance = AimAssist:CreateSlider({
 		Name = 'Distance',
 		Min = 1,
@@ -1267,20 +1293,38 @@ run(function()
 			return val == 1 and 'stud' or 'studs'
 		end
 	})
+
 	AngleSlider = AimAssist:CreateSlider({
 		Name = 'Max angle',
 		Min = 1,
 		Max = 360,
 		Default = 70
 	})
+
+	Shake = AimAssist:CreateSlider({
+		Name = 'Shake',
+		Min = 0,
+		Max = 100,
+		Default = 0,
+		Tooltip = 'Adds random jitter to simulate human aim lmfao xd'
+	})
+
 	ClickAim = AimAssist:CreateToggle({
 		Name = 'Click Aim',
 		Default = true
 	})
+
 	KillauraTarget = AimAssist:CreateToggle({
 		Name = 'Use killaura target'
 	})
-	StrafeIncrease = AimAssist:CreateToggle({Name = 'Strafe increase'})
+
+	Third = AimAssist:CreateToggle({
+		Name = 'Third person aim'
+	})
+
+	StrafeIncrease = AimAssist:CreateToggle({
+		Name = 'Strafe increase'
+	})
 end)
 	
 run(function()
@@ -2321,8 +2365,8 @@ run(function()
 	AttackRange = Killaura:CreateSlider({
 		Name = 'Attack range',
 		Min = 1,
-		Max = 28,
-		Default = 28,
+		Max = 30,
+		Default = 14,
 		Suffix = function(val)
 			return val == 1 and 'stud' or 'studs'
 		end
@@ -2542,6 +2586,7 @@ run(function()
         Name = 'Swing only',
         Tooltip = 'Only attacks while swinging manually'
     })
+end)
 	
 run(function()
 	local Value
