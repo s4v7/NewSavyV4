@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/pxzw/savyv4/refs/heads/main/NewMainScript.lua", true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/theyfearsavy-star/NewSavyV4/refs/heads/main/NewMainScript.lua", true))()
