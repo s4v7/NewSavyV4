@@ -5133,7 +5133,7 @@ run(function()
 			if vape.Profile ~= Profile.Value then
 				vape:Load(true, Profile.Value)
 			end
-		elseif Mode.Value == 'AutoConfig' then
+		elseif Mode.Value == 'ClosetMode' then
 			local safe = {'AutoClicker', 'Reach', 'Sprint', 'HitFix', 'StaffDetector'}
 			vape.Save = function() end
 			for i, v in vape.Modules do
@@ -5223,7 +5223,7 @@ run(function()
 	})
 	Mode = StaffDetector:CreateDropdown({
 		Name = 'Mode',
-		List = {'Uninject', 'Profile', 'Requeue', 'AutoConfig', 'Notify'},
+		List = {'Uninject', 'Profile', 'Requeue', 'ClosetMode', 'Notify'},
 		Function = function(val)
 			if Profile.Object then
 				Profile.Object.Visible = val == 'Profile'
