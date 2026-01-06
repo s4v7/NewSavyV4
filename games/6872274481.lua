@@ -9022,7 +9022,7 @@ end)
 end)
 	
 run(function()
-	local EmptyGameTP
+	local AutoEmptyGameTP
 	local TeleportOnMatchEnd
 	
 	local function isGameEmpty()
@@ -9046,10 +9046,10 @@ run(function()
 		local TeleportService = game:GetService("TeleportService")
 		local data = TeleportService:GetLocalPlayerTeleportData()
 		
-		notif("EmptyGameTP", "tping to new game...", 3)
+		notif("AutoEmptyGameTP", "tping to new game...", 3)
 		task.wait(0.5) 
 		
-		EmptyGameTP:Clean(TeleportService:Teleport(game.PlaceId, lplr, data))
+		AutoEmptyGameTP:Clean(TeleportService:Teleport(game.PlaceId, lplr, data))
 	end
 	
 	local function handleMatchCompletion()
@@ -9058,18 +9058,18 @@ run(function()
 		end
 	end
 	
-	EmptyGameTP = vape.Categories.Blatant:CreateModule({
-		Name = 'EmptyGameTP',
+	AutoEmptyGameTP = vape.Categories.Blatant:CreateModule({
+		Name = 'AutoEmptyGameTP',
 		Function = function(callback)
 			
 			if callback then
 				if TeleportOnMatchEnd.Enabled then
-					EmptyGameTP:Clean(vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
+					AutoEmptyGameTP:Clean(vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
 						task.wait(1) 
 						handleMatchCompletion()
 					end))
 					
-					EmptyGameTP:Clean(vapeEvents.EntityDeathEvent.Event:Connect(function(deathTable)
+					AutoEmptyGameTP:Clean(vapeEvents.EntityDeathEvent.Event:Connect(function(deathTable)
 						if deathTable.finalKill and deathTable.entityInstance == lplr.Character then
 							task.wait(1) 
 							if isEveryoneDead() and store.matchState ~= 2 then
@@ -9079,12 +9079,12 @@ run(function()
 					end))
 				else
 					if not isGameEmpty() then
-						notif("EmptyGameTP", "finding empty game...", 4)
+						notif("AutoEmptyGameTP", "finding empty game...", 4)
 						task.wait(1.5) 
 						teleportToNewGame()
 					else
-						notif("EmptyGameTP", "already in empty game", 3)
-						EmptyGameTP:Toggle() 
+						notif("AutoEmptyGameTP", "already in empty game", 3)
+						AutoEmptyGameTP:Toggle() 
 					end
 				end
 			end
@@ -9092,7 +9092,7 @@ run(function()
 		Tooltip = 'teleports you to an empty\nuseful for resetting match history]'
 	})
 	
-	TeleportOnMatchEnd = EmptyGameTP:CreateToggle({
+	TeleportOnMatchEnd = AutoEmptyGameTP:CreateToggle({
 		Name = "Teleport After Match",
 		Default = true,
 		Tooltip = "waits until match ends (win/loss) before teleporting\ndisable for instant teleport to empty game(idea from soyred)"
@@ -9218,4 +9218,116 @@ end)
 		end,
 		Tooltip = 'Shows what fish you are catching'
 	})
+end)
+
+	
+run(function()
+    local MetalDetector
+    local LimitToItem
+    local Animation
+    local CollectionDelay
+    local DelaySlider
+    local RangeSlider
+
+    MetalDetector = vape.Categories.Utility:CreateModule({
+        Name = 'MetalDetector',
+        Function = function(callback)
+            if callback then
+                repeat
+                    if not entitylib.isAlive then
+                        task.wait(0.1)
+                        continue
+                    end
+                    
+                    if LimitToItem.Enabled then
+                        local hasShovel = false
+                        if store.hand and store.hand.tool then
+                            if store.hand.tool.Name == 'metal_detector' then
+                                hasShovel = true
+                            end
+                        end
+                        
+                        if not hasShovel then
+                            task.wait(0.1)
+                            continue
+                        end
+                    end
+                    
+                    local localPosition = entitylib.character.RootPart.Position
+                    local range = RangeSlider.Value  
+                    
+                    for _, v in collectionService:GetTagged('hidden-metal') do
+                        if not MetalDetector.Enabled then break end
+                        
+                        if v:IsA("Model") and v.PrimaryPart then
+                            local metalPos = v.PrimaryPart.Position
+                            local distance = (localPosition - metalPos).Magnitude
+                            
+                            if distance <= range then
+                                if CollectionDelay.Enabled and DelaySlider.Value > 0 then
+                                    task.wait(DelaySlider.Value)
+                                end
+                                
+                                if Animation.Enabled then
+                                    bedwars.GameAnimationUtil:playAnimation(lplr, bedwars.AnimationType.SHOVEL_DIG)
+                                    bedwars.SoundManager:playSound(bedwars.SoundList.SNAP_TRAP_CONSUME_MARK)
+                                end
+                        
+                                bedwars.Client:Get(remotes.PickupMetal):SendToServer({
+                                    id = v:GetAttribute('Id')
+                                })
+                                
+                                task.wait(0.1)
+                            end
+                        end
+                    end
+                    
+                    task.wait(0.1)
+                until not MetalDetector.Enabled
+            end
+        end,
+        Tooltip = 'Automatically collects hidden metal'
+    })
+    
+    LimitToItem = MetalDetector:CreateToggle({
+        Name = 'Limit to Items',
+        Default = true,
+        Tooltip = 'Only works when holding metal_detector'
+    })
+    
+    Animation = MetalDetector:CreateToggle({
+        Name = 'Animation',
+        Default = true,
+        Tooltip = 'Play shovel dig animation and sound'
+    })
+    
+    CollectionDelay = MetalDetector:CreateToggle({
+        Name = 'Collection Delay',
+        Default = false,
+        Tooltip = 'Add delay before collecting metal',
+        Function = function(callback)
+            DelaySlider.Object.Visible = callback
+        end
+    })
+    
+    DelaySlider = MetalDetector:CreateSlider({
+        Name = 'Delay',
+        Min = 0,
+        Max = 2,
+        Default = 0.5,
+        Decimal = 10,
+        Suffix = 's',
+        Visible = false,
+        Tooltip = 'Delay in seconds before collecting'
+    })
+    
+    RangeSlider = MetalDetector:CreateSlider({
+        Name = 'Range',
+        Min = 1, 
+        Max = 10,
+        Default = 10,  
+        Decimal = 1, 
+        Suffix = ' studs',
+        Tooltip = 'Controll distance you want to collect metal'
+    })
 end)
