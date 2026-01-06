@@ -8880,7 +8880,7 @@ end)
 				bedwars.ProjectileController.calculateImportantLaunchValues = old
 			end
 		end,
-		Tooltip = 'Silently adjusts your aim towards the enemy'
+		Tooltip = 'Yang adjusts his PA towards the enemy'
 	})
 	Targets = ProjectileAimbot:CreateTargets({
 		Players = true,
@@ -8902,3 +8902,121 @@ end)
 	})
 end)
 	
+	run(function()
+    local anim
+    local asset
+    local trackingConnection
+    local NightmareEmote
+    
+    NightmareEmote = vape.Categories.World:CreateModule({
+        Name = "NightmareEmote",
+        Function = function(call)
+            if call then
+                local l__GameQueryUtil__8
+                if (not shared.CheatEngineMode) then 
+                    l__GameQueryUtil__8 = require(game:GetService("ReplicatedStorage")['rbxts_include']['node_modules']['@easy-games']['game-core'].out).GameQueryUtil 
+                else
+                    local backup = {}; function backup:setQueryIgnored() end; l__GameQueryUtil__8 = backup;
+                end
+                local l__TweenService__9 = game:GetService("TweenService")
+                local player = game:GetService("Players").LocalPlayer
+                local character = player.Character
+                
+                if not character then 
+                    NightmareEmote:Toggle() 
+                    return 
+                end
+                
+                local humanoid = character:WaitForChild("Humanoid")
+                local rootPart = character.PrimaryPart or character:FindFirstChild("HumanoidRootPart")
+                
+                if not rootPart then 
+                    NightmareEmote:Toggle() 
+                    return 
+                end
+                
+                local v10 = game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Effects"):WaitForChild("NightmareEmote"):Clone()
+                asset = v10
+                v10.Parent = game.Workspace
+                
+                local v11 = v10:GetDescendants()
+                local function v12(p8)
+                    if p8:IsA("BasePart") then
+                        l__GameQueryUtil__8:setQueryIgnored(p8, true)
+                        p8.CanCollide = false
+                        p8.Anchored = true
+                    end
+                end
+                
+                for v13, v14 in ipairs(v11) do
+                    v12(v14, v13 - 1, v11)
+                end
+                
+                local l__Outer__15 = v10:FindFirstChild("Outer")
+                if l__Outer__15 then
+                    l__TweenService__9:Create(l__Outer__15, TweenInfo.new(1.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1), {
+                        Orientation = l__Outer__15.Orientation + Vector3.new(0, 360, 0)
+                    }):Play()
+                end
+                
+                local l__Middle__16 = v10:FindFirstChild("Middle")
+                if l__Middle__16 then
+                    l__TweenService__9:Create(l__Middle__16, TweenInfo.new(12.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1), {
+                        Orientation = l__Middle__16.Orientation + Vector3.new(0, -360, 0)
+                    }):Play()
+                end
+                
+                anim = Instance.new("Animation")
+                anim.AnimationId = "rbxassetid://9191822700"
+                anim = humanoid:LoadAnimation(anim)
+                anim:Play()
+                
+                trackingConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                    if not asset or not asset.Parent then 
+                        trackingConnection:Disconnect()
+                        return 
+                    end
+                    
+                    if not character or not character.Parent then
+                        asset:Destroy()
+                        asset = nil
+                        trackingConnection:Disconnect()
+                        NightmareEmote:Toggle()
+                        return
+                    end
+                    
+                    local currentRoot = character.PrimaryPart or character:FindFirstChild("HumanoidRootPart")
+                    local currentHumanoid = character:FindFirstChildOfClass("Humanoid")
+                    
+                    if not currentRoot or not currentHumanoid or currentHumanoid.Health <= 0 then
+                        asset:Destroy()
+                        asset = nil
+                        trackingConnection:Disconnect()
+                        NightmareEmote:Toggle()
+                        return
+                    end
+                
+                    v10:SetPrimaryPartCFrame(currentRoot.CFrame * CFrame.new(0, -3, 0))
+                end)
+                
+                NightmareEmote:Clean(trackingConnection)
+                
+            else 
+                if trackingConnection then
+                    trackingConnection:Disconnect()
+                    trackingConnection = nil
+                end
+                
+                if anim then 
+                    anim:Stop()
+                    anim = nil
+                end
+                
+                if asset then
+                    asset:Destroy() 
+                    asset = nil
+                end
+            end
+        end
+    })
+end)
