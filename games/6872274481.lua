@@ -9362,44 +9362,7 @@ run(function()
     })
 end)
 
-	run(function()
-    local aim = 0.158
-    local tnt = 0.0045
-    local aunchself = 0.395
-
-    local defaultaim = 0.4
-    local defaulttnt = 0.2
-    local defaultself = 0.4
-
-	local A
-	local T
-	local L
-	local C
-	local AJ
-    local function getWorldFolder()
-        local Map = workspace:WaitForChild("Map", math.huge)
-        local Worlds = Map:WaitForChild("Worlds", math.huge)
-        if not Worlds then return nil end
-
-        return Worlds:GetChildren()[1] 
-    end
-
-    local function setCannonSpeeds(blocksFolder, aimDur, tntDur, selfDur)
-        for _, v in ipairs(blocksFolder:GetChildren()) do 
-            if v:IsA("BasePart") and v.Name == "cannon" then
-                local AimPrompt = v:FindFirstChild("AimPrompt")
-                local FirePrompt = v:FindFirstChild("FirePrompt")
-                local LaunchSelfPrompt = v:FindFirstChild("LaunchSelfPrompt")
-                if AimPrompt and FirePrompt and LaunchSelfPrompt then
-                    AimPrompt.HoldDuration = aimDur
-                    FirePrompt.HoldDuration = tntDur
-                    LaunchSelfPrompt.HoldDuration = selfDur
-                end
-            end
-        end
-    end
-
-   run(function()
+  run(function()
     local aim = 0.158
     local tnt = 0.0045
     local aunchself = 0.395
@@ -9417,11 +9380,12 @@ end)
     local function getWorldFolder()
         local Map = workspace:WaitForChild("Map", math.huge)
         local Worlds = Map:WaitForChild("Worlds", math.huge)
-        if not Worlds then return nil end
+        if not Worlds then
+            return nil
+        end
 
         return Worlds:GetChildren()[1]
     end
-end)
 
     local function setCannonSpeeds(blocksFolder, aimDur, tntDur, selfDur)
         for _, v in ipairs(blocksFolder:GetChildren()) do 
@@ -9437,6 +9401,8 @@ end)
             end
         end
     end
+
+end)
 
 BetterDavey = vape.Categories.Blatant:CreateModule({
     Name = "BetterDavey",
