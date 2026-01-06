@@ -9146,7 +9146,6 @@ end)
 	local originalCreateElement = nil
 	local moduleEnabled = false
 	local notificationQueue = {}
-	
 	local fishNames = {
 		fish_iron = "iron fish",
 		fish_diamond = "diamond fish",
