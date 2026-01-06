@@ -2023,7 +2023,7 @@ run(function()
 		Default = true
 	})
 end)
-	
+
 run(function()
 	local Mode
 	local Expand
@@ -2045,8 +2045,9 @@ run(function()
 			objects[ent] = hitbox
 		end
 	end
+end)
 	
-	run(function()
+run(function()
     local Mode
     local Expand
     local objects, set = {}
@@ -2139,6 +2140,7 @@ Expand = HitBoxes:CreateSlider({
         return val == 1 and "stud" or "studs"
     end
 })
+end)
 
 run(function()
 	vape.Categories.Blatant:CreateModule({
