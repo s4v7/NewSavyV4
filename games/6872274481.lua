@@ -9436,121 +9436,129 @@ end)
         end
     end
 
-    BetterDavey = vape.Categories.Blatant:CreateModule({
-        Name = "BetterDavey",
-        Tooltip = "makes u look better with davey",
-        Function = function(callback)       
-            local worldFolder = getWorldFolder()
-            if not worldFolder then return end
-            local blocks = worldFolder:WaitForChild("Blocks")
+BetterDavey = vape.Categories.Blatant:CreateModule({
+    Name = "BetterDavey",
+    Tooltip = "makes u look better with davey",
+    Function = function(callback)
+        local worldFolder = getWorldFolder()
+        if not worldFolder then return end
+        local blocks = worldFolder:WaitForChild("Blocks")
 
-            if callback then
-                setCannonSpeeds(blocks, aim, tnt, aunchself)
+        if callback then
+            -- enable: apply current values
+            setCannonSpeeds(blocks, aim, tnt, launchself)
 
-               BetterDavey:Clean( blocks.ChildAdded:Connect(function(child)
-                    if child:IsA("BasePart") and child.Name == "cannon" and BetterDavey.Enabled then
-                        local AimPrompt = child:WaitForChild("AimPrompt")
-                        local FirePrompt = child:WaitForChild("FirePrompt")
-                        local LaunchSelfPrompt = child:WaitForChild("LaunchSelfPrompt")
+            BetterDavey:Clean(blocks.ChildAdded:Connect(function(child)
+                if child:IsA("BasePart") and child.Name == "cannon" and BetterDavey.Enabled then
+                    local AimPrompt = child:WaitForChild("AimPrompt")
+                    local FirePrompt = child:WaitForChild("FirePrompt")
+                    local LaunchSelfPrompt = child:WaitForChild("LaunchSelfPrompt")
 
-                        AimPrompt.HoldDuration = aim
-                        FirePrompt.HoldDuration = tnt
-                        LaunchSelfPrompt.HoldDuration = aunchself
-					BetterDavey:Clean(LaunchSelfPrompt.Triggered:Connect(function(p)
-						local humanoid = entitylib.character.Humanoid
-					
-						if not humanoid then return end
-					
-						if Speed.Enabled and Fly.Enabled then
-							Fly:Toggle(false)
-							task.wait(0.025)
-							Speed:Toggle(false)
-						elseif Speed.Enabled then
-							Speed:Toggle(false)
-						elseif Fly.Enabled then
-							Fly:Toggle(false)
-						end
+                    AimPrompt.HoldDuration = aim
+                    FirePrompt.HoldDuration = tnt
+                    LaunchSelfPrompt.HoldDuration = launchself
 
-						bedwars.breakBlock(child)
+                    BetterDavey:Clean(LaunchSelfPrompt.Triggered:Connect(function(p)
+                        local humanoid = entitylib.character and entitylib.character.Humanoid
+                        if not humanoid then return end
 
-						if AJ.Enabled then
-							if humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
-								humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-							end
-						end
-					end))
-                    end
-                end))
-            else
-                setCannonSpeeds(blocks, defaultaim, defaulttnt, defaultself)
-            end
+                        if Speed.Enabled and Fly.Enabled then
+                            Fly:Toggle(false)
+                            task.wait(0.025)
+                            Speed:Toggle(false)
+                        elseif Speed.Enabled then
+                            Speed:Toggle(false)
+                        elseif Fly.Enabled then
+                            Fly:Toggle(false)
+                        end
+
+                        bedwars.breakBlock(child)
+
+                        if AJ.Enabled then
+                            if humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                            end
+                        end
+                    end))
+                end
+            end))
+        else
+            -- disable: restore defaults
+            setCannonSpeeds(blocks, defaultaim, defaulttnt, defaultself)
         end
-    })
-	AJ = BetterDavey:CreateToggle({
-		Name = "Auto-Jump",
-		Default = true																																																						
-	})																																																					
-	A = BetterDavey:CreateSlider({
-		Name = "Aim",
-		Visible = false,
-		Min = 0,
-		Max = 1,
-		Default = aim,
-		Decimal = 10,
-		Function = function(v)
-			aim = v
+    end
+})
+
+AJ = BetterDavey:CreateToggle({
+    Name = "Auto-Jump",
+    Default = true
+})
+
+A = BetterDavey:CreateSlider({
+    Name = "Aim",
+    Visible = false,
+    Min = 0,
+    Max = 1,
+    Default = aim,
+    Decimal = 10,
+    Function = function(v)
+        aim = v
+        local worldFolder = getWorldFolder()
+        if not worldFolder then return end
+        local blocks = worldFolder:WaitForChild("Blocks")
+        setCannonSpeeds(blocks, aim, tnt, launchself)
+    end
+})
+
+T = BetterDavey:CreateSlider({
+    Name = "Tnt",
+    Visible = false,
+    Min = 0,
+    Max = 1,
+    Default = tnt,
+    Decimal = 10,
+    Function = function(v)
+        tnt = v
+        local worldFolder = getWorldFolder()
+        if not worldFolder then return end
+        local blocks = worldFolder:WaitForChild("Blocks")
+        setCannonSpeeds(blocks, aim, tnt, launchself)
+    end
+})
+
+L = BetterDavey:CreateSlider({
+    Name = "Launch Self",
+    Visible = false,
+    Min = 0,
+    Max = 1,
+    Default = launchself,
+    Decimal = 10,
+    Function = function(v)
+        launchself = v
+        local worldFolder = getWorldFolder()
+        if not worldFolder then return end
+        local blocks = worldFolder:WaitForChild("Blocks")
+        setCannonSpeeds(blocks, aim, tnt, launchself)
+    end
+})
+
+C = BetterDavey:CreateToggle({
+    Name = "Customize",
+    Default = false,
+    Function = function(v)
+        A.Object.Visible = v
+        T.Object.Visible = v
+        L.Object.Visible = v
+
+        if not v then
+            aim = 0.158
+            tnt = 0.0045
+            launchself = 0.395
+
             local worldFolder = getWorldFolder()
             if not worldFolder then return end
             local blocks = worldFolder:WaitForChild("Blocks")
-            setCannonSpeeds(blocks, aim, tnt, aunchself)
-		end
-	})
-
-	T = BetterDavey:CreateSlider({
-		Name = "Tnt",
-		Visible = false,
-		Min = 0,
-		Max = 1,
-		Default = tnt,
-		Decimal = 10,
-		Function = function(v)
-			tnt = v
-            local worldFolder = getWorldFolder()
-            if not worldFolder then return end
-            local blocks = worldFolder:WaitForChild("Blocks")
-            setCannonSpeeds(blocks, aim, tnt, aunchself)
-		end
-	})
-
-	L = BetterDavey:CreateSlider({
-		Name = "Launch Self",
-		Visible = false,
-		Min = 0,
-		Max = 1,
-		Default = aunchself,
-		Decimal = 10,
-		Function = function(v)
-			aunchself = v
-            local worldFolder = getWorldFolder()
-            if not worldFolder then return end
-            local blocks = worldFolder:WaitForChild("Blocks")
-            setCannonSpeeds(blocks, aim, tnt, aunchself)
-		end
-	})
-
-	C = BetterDavey:CreateToggle({
-		Name = "Customize",
-		Default = false,
-		Function = function(v)
-			A.Object.Visible = v
-			T.Object.Visible = v
-			L.Object.Visible = v
-			if not v then
-				aim = 0.158
-				tnt = 0.0045
-				aunchself = 0.395
-			end
-		end
-	})
-
-end)
+            setCannonSpeeds(blocks, aim, tnt, launchself)
+        end
+    end
+})
