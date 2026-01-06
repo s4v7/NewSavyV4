@@ -336,12 +336,12 @@ local function notif(...) return
 end
 
 local function removeTags(str)
-    str = str:gsub('<br%s*/>', '\n')
-    return (str:gsub('<.->', ''))
+	str = str:gsub('<br%s*/>', '\n')
+	return (str:gsub('<[^<>]->', ''))
 end
 
 local function roundPos(vec)
-    return Vector3.new(math.round(vec.X / 3) * 3, math.round(vec.Y / 3) * 3, math.round(vec.Z / 3) * 3)
+	return Vector3.new(math.round(vec.X / 3) * 3, math.round(vec.Y / 3) * 3, math.round(vec.Z / 3) * 3)
 end
 
 local function switchItem(tool, delayTime)
@@ -9020,7 +9020,7 @@ end)
         end
     })
 end)
-
+	
 run(function()
 	local AutoEmptyGameTP
 	local TeleportOnMatchEnd
@@ -9142,7 +9142,7 @@ end)
 
 	run(function()
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")		
-	local Fisher ESP
+	local FisherESP
 	local originalCreateElement = nil
 	local moduleEnabled = false
 	local notificationQueue = {}
@@ -9159,7 +9159,7 @@ end)
 		while #notificationQueue > 0 do
 			local fishType = table.remove(notificationQueue, 1)
 			local fishName = fishNames[fishType] or fishType
-			notif('Fisher ESP', 'This fish is a ' .. fishName, 3)
+			notif('FisherESP', 'This fish is a ' .. fishName, 3)
 		end
 	end
 
@@ -9170,8 +9170,8 @@ end)
 		end
 	end)
 	
-	Fisher ESP = vape.Categories.Utility:CreateModule({
-		Name = 'Fisher ESP',
+	FisherESP = vape.Categories.Utility:CreateModule({
+		Name = 'FisherESP',
 		Function = function(callback)
 			if callback then
 				moduleEnabled = true
@@ -9200,8 +9200,8 @@ end)
 					
 					if success then
 					else
-						notif('Fisher ESP', 'failed to hook try rejoining', 5)
-						Fisher ESP:Toggle()
+						notif('FisherESP', 'failed to hook try rejoining', 5)
+						FisherESP:Toggle()
 					end
 				end)
 			else
