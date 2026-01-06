@@ -2083,7 +2083,7 @@ run(function()
                             objects[ent] = nil
                         end
                     end))
-                    for , ent in entitylib.List do
+                    for ent in entitylib.List do
                         createHitbox(ent)
                     end
                 end
