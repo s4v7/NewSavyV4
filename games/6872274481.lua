@@ -758,24 +758,24 @@ run(function()
 		WarlockTarget = debug.getproto(Knit.Controllers.WarlockStaffController.KnitStart, 2)
 	}
 
-	local function dumpRemote(tab)
-		local ind
-		for i, v in tab do
-			if v == 'Client' then
-				ind = i
-				break
-			end
-		end
-		return ind and tab[ind + 1] or ''
-	end
+local function dumpRemote(tab)
+        local ind
+        for i, v in tab do
+            if v == 'Client' then
+                ind = i
+                break
+            end
+        end
+        return ind and tab[ind + 1] or ''
+    end
 
-	for i, v in remoteNames do
-		local remote = dumpRemote(debug.getconstants(v))
-		if remote == '' then
-			notif('Vape', 'Failed to grab remote ('..i..')', 10, 'alert')
-		end
-		remotes[i] = remote
-	end
+    for i, v in remoteNames do
+        local remote = dumpRemote(debug.getconstants(v))
+        if remote == '' then
+            notif('Vape', 'Failed to grab remote ('..i..')', 10, 'alert')
+        end
+        remotes[i] = remote
+    end
 
 	OldBreak = bedwars.BlockController.isBlockBreakable
 
