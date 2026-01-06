@@ -9020,3 +9020,203 @@ end)
         end
     })
 end)
+
+	
+run(function()
+	local EmptyGameTP
+	local TeleportOnMatchEnd
+	
+	local function isGameEmpty()
+		return #playersService:GetPlayers() <= 1
+	end
+	
+	local function isEveryoneDead()
+		for _, player in playersService:GetPlayers() do
+			if player ~= lplr and player:GetAttribute("PlayingAsKit") then
+				if player.Character and player.Character:GetAttribute("Health") > 0 then
+					return false
+				end
+			end
+		end
+		return true
+	end
+	
+	local function teleportToNewGame()
+		if isGameEmpty() then return end 
+		
+		local TeleportService = game:GetService("TeleportService")
+		local data = TeleportService:GetLocalPlayerTeleportData()
+		
+		notif("EmptyGameTP", "tping to new game...", 3)
+		task.wait(0.5) 
+		
+		EmptyGameTP:Clean(TeleportService:Teleport(game.PlaceId, lplr, data))
+	end
+	
+	local function handleMatchCompletion()
+		if store.matchState == 2 then 
+			teleportToNewGame()
+		end
+	end
+	
+	EmptyGameTP = vape.Categories.Blatant:CreateModule({
+		Name = 'EmptyGameTP',
+		Function = function(callback)
+			
+			if callback then
+				if TeleportOnMatchEnd.Enabled then
+					EmptyGameTP:Clean(vapeEvents.MatchEndEvent.Event:Connect(function(winTable)
+						task.wait(1) 
+						handleMatchCompletion()
+					end))
+					
+					EmptyGameTP:Clean(vapeEvents.EntityDeathEvent.Event:Connect(function(deathTable)
+						if deathTable.finalKill and deathTable.entityInstance == lplr.Character then
+							task.wait(1) 
+							if isEveryoneDead() and store.matchState ~= 2 then
+								teleportToNewGame()
+							end
+						end
+					end))
+				else
+					if not isGameEmpty() then
+						notif("EmptyGameTP", "finding empty game...", 4)
+						task.wait(1.5) 
+						teleportToNewGame()
+					else
+						notif("EmptyGameTP", "already in empty game", 3)
+						EmptyGameTP:Toggle() 
+					end
+				end
+			end
+		end,
+		Tooltip = 'teleports you to an empty\nuseful for resetting match history]'
+	})
+	
+	TeleportOnMatchEnd = EmptyGameTP:CreateToggle({
+		Name = "Teleport After Match",
+		Default = true,
+		Tooltip = "waits until match ends (win/loss) before teleporting\ndisable for instant teleport to empty game(idea from soyred)"
+	})
+end)
+
+	run(function()
+	local char = lplr.Character or lplr.CharacterAdded:wait()
+	local Headless = {Enabled = false}
+	local faceTransparencyBackup = nil
+	
+	Headless = vape.Categories.Utility:CreateModule({
+		PerformanceModeBlacklisted = true,
+		Name = 'Headless',
+		Tooltip = 'Free headless Head',
+		Function = function(callback)
+			if callback then
+				task.spawn(function()
+					repeat 
+						task.wait()
+						if entitylib.isAlive and entitylib.character.Character and entitylib.character.Head then
+							entitylib.character.Head.Transparency = 1
+							
+							local face = entitylib.character.Head:FindFirstChild('face')
+							if face and face:IsA("Decal") and faceTransparencyBackup == nil then
+								faceTransparencyBackup = face.Transparency
+								face.Transparency = 1
+							end
+						end
+					until not Headless.Enabled
+				end)
+			else
+				if entitylib.isAlive and entitylib.character.Character and entitylib.character.Head then
+					entitylib.character.Head.Transparency = 0
+					
+					local face = entitylib.character.Head:FindFirstChild('face')
+					if face and face:IsA("Decal") and faceTransparencyBackup ~= nil then
+						face.Transparency = faceTransparencyBackup
+						faceTransparencyBackup = nil
+					end
+				end
+			end
+		end,
+		Default = false
+	})
+end)
+
+	run(function()
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")		
+	local Fisher ESP
+	local originalCreateElement = nil
+	local moduleEnabled = false
+	local notificationQueue = {}
+	
+	local fishNames = {
+		fish_iron = "iron fish",
+		fish_diamond = "diamond fish",
+		fish_gold = "gold fish",
+		fish_special = "special fish",
+		fish_emerald = "emerald fish"
+	}
+	
+	local function processNotificationQueue()
+		while #notificationQueue > 0 do
+			local fishType = table.remove(notificationQueue, 1)
+			local fishName = fishNames[fishType] or fishType
+			notif('Fisher ESP', 'This fish is a ' .. fishName, 3)
+		end
+	end
+
+	task.spawn(function()
+		while true do
+			processNotificationQueue()
+			task.wait(0.1)
+		end
+	end)
+	
+	Fisher ESP = vape.Categories.Utility:CreateModule({
+		Name = 'Fisher ESP',
+		Function = function(callback)
+			if callback then
+				moduleEnabled = true
+				task.spawn(function()
+					wait(1)
+					local success = pcall(function()
+						local Roact = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("roact"):WaitForChild("src"))
+						
+						if originalCreateElement == nil then
+							originalCreateElement = Roact.createElement
+						end
+						
+						Roact.createElement = function(component, props, ...)
+							local result = originalCreateElement(component, props, ...)
+							
+							if moduleEnabled and props and props.fishType then
+								local fishType = props.fishType
+								if props.decaySpeedMultiplier then
+									table.insert(notificationQueue, fishType)
+								end
+							end
+							
+							return result
+						end
+					end)
+					
+					if success then
+					else
+						notif('Fisher ESP', 'failed to hook try rejoining', 5)
+						Fisher ESP:Toggle()
+					end
+				end)
+			else
+				moduleEnabled = false
+				if originalCreateElement then
+					pcall(function()
+						local Roact = require(ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("roact"):WaitForChild("src"))
+						Roact.createElement = originalCreateElement
+						originalCreateElement = nil
+					end)
+				end
+				notificationQueue = {}
+			end
+		end,
+		Tooltip = 'Shows what fish you are catching'
+	})
+end)
