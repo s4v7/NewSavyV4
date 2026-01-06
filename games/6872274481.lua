@@ -5351,6 +5351,9 @@ end)
 run(function()
 	local AutoSuffocate
 	local Range
+	local Solutions
+	local Prediction
+	local SmartSpread
 	local LimitItem
 	
 	local function fixPosition(pos)
@@ -5404,7 +5407,7 @@ run(function()
 		end,
 		Tooltip = 'Places blocks on nearby confined entities'
 	})
-	Range = AutoSuffocate:CreateSlider({
+Range = AutoSuffocate:CreateSlider({
 		Name = 'Range',
 		Min = 1,
 		Max = 20,
@@ -5413,6 +5416,30 @@ run(function()
 			return val == 1 and 'stud' or 'studs'
 		end
 	})
+
+	Solutions = AutoSuffocate:CreateSlider({
+		Name = 'Solutions',
+		Min = 1,
+		Max = 10,
+		Default = 6
+	})
+
+	Prediction = AutoSuffocate:CreateSlider({
+		Name = 'Prediction',
+		Min = 0,
+		Max = 1,
+		Suffix = 's',
+		Default = 0.7,
+		Decimal = 5,
+		Tooltip = 'Predict player movement forward in seconds'
+	})
+
+	SmartSpread = AutoSuffocate:CreateToggle({
+		Name = 'Smart Spreda',
+		Default = true,
+		Tooltip = 'Places corners first and builds support if air placement needed'
+	})
+
 	LimitItem = AutoSuffocate:CreateToggle({
 		Name = 'Limit to Items',
 		Default = true
@@ -9561,200 +9588,6 @@ C = BetterDavey:CreateToggle({
         end
     end
 })
-
-	run(function()
-	local AutoSuffocate
-	local Solutions
-	local Range
-	local LimitItem
-	local Prediction
-	local SmartSpread
-
-	local function fixPosition(pos)
-		return bedwars.BlockController:getBlockPosition(pos) * 3
-	end
-
-	local function isOpen(pos)
-		return not getPlacedBlock(pos)
-	end
-
-	local function hasAdjacent(pos)
-		local offsets = {
-			Vector3.new(3, 0, 0),
-			Vector3.new(-3, 0, 0),
-			Vector3.new(0, 0, 3),
-			Vector3.new(0, 0, -3),
-			Vector3.new(0, -3, 0)
-		}
-		for _, off in offsets do
-			if not isOpen(pos + off) then
-				return true
-			end
-		end
-		return false
-	end
-
-	local function buildSupportPath(targetPos, item, maxLength)
-		local start = fixPosition(targetPos - Vector3.new(0, 3, 0))
-		local bestAnchor = nil
-		local found = false
-
-		for y = 0, 12, 3 do
-			for x = -9, 9, 3 do
-				for z = -9, 9, 3 do
-					local check = start + Vector3.new(x, -y, z)
-					if not isOpen(check) then
-						bestAnchor = check
-						found = true
-						break
-					end
-				end
-				if found then break end
-			end
-			if found then break end
-		end
-
-		if not bestAnchor then return false end
-
-		local dir = (targetPos - bestAnchor).Unit
-		local step = dir * 3
-		local current = bestAnchor
-		local placed = 0
-
-		while (current - targetPos).Magnitude > 3 and placed < maxLength do
-			current += step
-			local pos = fixPosition(current)
-			if isOpen(pos) and hasAdjacent(pos) then
-				task.spawn(bedwars.placeBlock, pos, item)
-				placed += 1
-			end
-			task.wait()
-		end
-
-		return true
-	end
-
-	AutoSuffocate = vape.Categories.World:CreateModule({
-		Name = 'Auto Suffocate',
-		Function = function(callback)
-			if callback then
-				repeat
-					local item = store.hand.toolType == 'block' and store.hand.tool.Name or not LimitItem.Enabled and getWool()
-					if item then
-						local plrs = entitylib.AllPosition({
-							Part = 'RootPart',
-							Range = Range.Value,
-							Players = true
-						})
-
-						for _, ent in plrs do
-							if not ent or not ent.RootPart then continue end
-
-							local velocity = ent.RootPart.Velocity or Vector3.zero
-							local predicted = ent.RootPart.Position + velocity * Prediction.Value
-							local center = fixPosition(predicted)
-							local insidePos = center
-							local topPos = fixPosition(predicted + Vector3.new(0, 3, 0))
-
-							if not hasAdjacent(center) then
-								buildSupportPath(center, item, 10)
-							end
-
-							local needPlaced = {}
-							local placed = 0
-
-							local sideOffsets = {
-								Vector3.new(3, 0, 0),
-								Vector3.new(-3, 0, 0),
-								Vector3.new(0, 0, 3),
-								Vector3.new(0, 0, -3)
-							}
-							local cornerOffsets = {
-								Vector3.new(3, 0, 3),
-								Vector3.new(-3, 0, 3),
-								Vector3.new(3, 0, -3),
-								Vector3.new(-3, 0, -3)
-							}
-
-							if SmartSpread.Enabled then
-								for _, off in cornerOffsets do
-									local pos = center + off
-									if isOpen(pos) and hasAdjacent(pos) then
-										table.insert(needPlaced, pos)
-									end
-								end
-							end
-
-							for _, off in sideOffsets do
-								local pos = center + off
-								if isOpen(pos) and hasAdjacent(pos) then
-									table.insert(needPlaced, pos)
-								end
-							end
-
-							if isOpen(topPos) and hasAdjacent(topPos) then
-								table.insert(needPlaced, topPos)
-							end
-
-							if not isOpen(insidePos) or not hasAdjacent(insidePos) then
-							else
-								table.insert(needPlaced, insidePos)
-							end
-
-							for _, pos in needPlaced do
-								if placed >= Solutions.Value then break end
-								if isOpen(pos) then
-									task.spawn(bedwars.placeBlock, pos, item)
-									placed += 1
-								end
-							end
-						end
-					end
-					task.wait(0.09)
-				until not AutoSuffocate.Enabled
-			end
-		end,
-		Tooltip = 'Builds support blocks if needed, then creates adaptive suffocation cages around players'
-	})
-
-	Range = AutoSuffocate:CreateSlider({
-		Name = 'Range',
-		Min = 1,
-		Max = 20,
-		Default = 20,
-		Suffix = function(val)
-			return val == 1 and 'stud' or 'studs'
-		end
-	})
-
-	Solutions = AutoSuffocate:CreateSlider({
-		Name = 'Solutions',
-		Min = 1,
-		Max = 10,
-		Default = 6
-	})
-
-	Prediction = AutoSuffocate:CreateSlider({
-		Name = 'Prediction',
-		Min = 0,
-		Max = 1,
-		Suffix = 's',
-		Default = 0.7,
-		Decimal = 5,
-		Tooltip = 'Predict player movement forward in seconds'
-	})
-
-	SmartSpread = AutoSuffocate:CreateToggle({
-		Name = 'Smart Spread',
-		Default = true,
-		Tooltip = 'Places corners first and builds support if air placement needed'
-	})
-
-	LimitItem = AutoSuffocate:CreateToggle({
-		Name = 'Limit to Items',
-		Default = true
-	})
-end)
 
 		Killaura = vape.Categories.Blatant:CreateModule({
 			Name = 'YewinKillaura',
