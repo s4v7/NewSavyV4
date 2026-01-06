@@ -9397,7 +9397,7 @@ end)
                 end
             end
         end
-    end
+    end)
 
     run(function()
     local aim = 0.158
@@ -9419,7 +9419,7 @@ end)
         if not Worlds then return nil end
 
         return Worlds:GetChildren()[1] 
-    end
+    end)
 
     local function setCannonSpeeds(blocksFolder, aimDur, tntDur, selfDur)
         for _, v in ipairs(blocksFolder:GetChildren()) do 
