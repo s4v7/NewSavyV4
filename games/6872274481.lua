@@ -2105,8 +2105,8 @@ run(function()
                     end
                 end
             end
-        end,
-        Suffix, = function(val)
+        end
+        Suffix = function(val)
             return val == 1 and 'stud' or 'studs'
         end
     })
