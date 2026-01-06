@@ -9397,7 +9397,7 @@ end)
                 end
             end
         end
-    end)
+    end
 
     run(function()
     local aim = 0.158
