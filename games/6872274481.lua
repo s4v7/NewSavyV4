@@ -9161,7 +9161,7 @@ end)
 			local fishName = fishNames[fishType] or fishType
 			notif('Fisher ESP', 'This fish is a ' .. fishName, 3)
 		end
-	end
+	end)
 
 	task.spawn(function()
 		while true do
@@ -9219,4 +9219,3 @@ end)
 		Tooltip = 'Shows what fish you are catching'
 	})
 end)
-	
