@@ -336,12 +336,12 @@ local function notif(...) return
 end
 
 local function removeTags(str)
-	str = str:gsub('<br%s*/>', '\n')
-	return (str:gsub('<[^<>]->', ''))
+    str = str:gsub('<br%s*/>', '\n')
+    return (str:gsub('<.->', ''))
 end
 
 local function roundPos(vec)
-	return Vector3.new(math.round(vec.X / 3) * 3, math.round(vec.Y / 3) * 3, math.round(vec.Z / 3) * 3)
+    return Vector3.new(math.round(vec.X / 3) * 3, math.round(vec.Y / 3) * 3, math.round(vec.Z / 3) * 3)
 end
 
 local function switchItem(tool, delayTime)
@@ -9021,7 +9021,7 @@ end)
     })
 end)
 
-	run(function()
+run(function()
 	local AutoEmptyGameTP
 	local TeleportOnMatchEnd
 	
@@ -9146,6 +9146,7 @@ end)
 	local originalCreateElement = nil
 	local moduleEnabled = false
 	local notificationQueue = {}
+	
 	local fishNames = {
 		fish_iron = "iron fish",
 		fish_diamond = "diamond fish",
@@ -9160,7 +9161,7 @@ end)
 			local fishName = fishNames[fishType] or fishType
 			notif('Fisher ESP', 'This fish is a ' .. fishName, 3)
 		end
-	end)
+	end
 
 	task.spawn(function()
 		while true do
