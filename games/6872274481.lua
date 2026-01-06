@@ -1197,6 +1197,7 @@ end)
 for _, v in {'AntiRagdoll', 'TriggerBot', 'SilentAim', 'AutoRejoin', 'Rejoin', 'Disabler', 'Timer', 'ServerHop', 'MouseTP', 'MurderMystery'} do
 	vape:Remove(v)
 end
+
 run(function()
 	local AimAssist
 	local Third
@@ -1297,7 +1298,7 @@ run(function()
 		Name = 'Max angle',
 		Min = 1,
 		Max = 360,
-		Default = 70
+		Default = 90
 	})
 
 	Shake = AimAssist:CreateSlider({
