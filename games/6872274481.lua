@@ -8888,7 +8888,7 @@ end)
 	})
 	TargetPart = ProjectileAimbot:CreateDropdown({
 		Name = 'Part',
-		List = {'Body', 'Head'}
+		List = {'RootPart', 'Head'}
 	})
 	FOV = ProjectileAimbot:CreateSlider({
 		Name = 'FOV',
